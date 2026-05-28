@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="icon.png" type="image/png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jack Pack Opener</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    user-select:none;
+    -webkit-tap-highlight-color:transparent;
+}
+
+body{
+    overflow:hidden;
+    background:#efefef;
+    font-family:'Bebas Neue',sans-serif;
+}
+
+button{
+    font-family:'Bebas Neue',sans-serif;
+}
+
+#app{
+    width:100vw;
+    height:100vh;
+    position:relative;
+    overflow:hidden;
+}
+
+.title{
+    position:absolute;
+    top:25px;
+    left:50%;
+    transform:translateX(-50%);
+    text-align:center;
+    font-size:110px;
+    line-height:.88;
+    color:black;
+    z-index:20;
+    pointer-events:none;
+    transition:opacity .3s ease;
+}
+
+.title.hide{
+    opacity:0;
+}
+
+.top-btn{
+    position:absolute;
+    top:25px;
+    left:30px;
+    border:none;
+    background:none;
+    font-size:48px;
+    cursor:pointer;
+    z-index:100;
+}
+
+#openScreen{
+    position:absolute;
+    inset:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding-top:180px;
+}
+
+#sachetWrap{
+    position:relative;
+    width:260px;
+    height:480px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    cursor:pointer;
+    z-index:10;
+}
+
+#sachet{
+    width:240px;
+    animation:pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse{
+    0%,100%{ transform:scale(1); }
+    50%{ transform:scale(1.08); }
+}
+
+.click{
+    position:fixed;
+    font-size:70px;
+    font-weight:bold;
+    white-space:nowrap;
+    opacity:0;
+    z-index:150;
+    pointer-events:none;
+    text-shadow:2px 2px 0 rgba(0,0,0,0.1);
+    filter:drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+}
+
+.click.show{
+    opacity:.95;
+    animation:clickFloat .8s ease-out forwards;
+}
+
+@keyframes clickFloat{
+    0%{
+        transform:scale(.8) rotate(var(--rot-start));
+        opacity:0;
+    }
+    20%{
+        transform:scale(1.2) rotate(var(--rot-mid));
+        opacity:1;
+    }
+    100%{
+        transform:scale(1) rotate(var(--rot-end));
+        opacity:.95;
+    }
+}
+
+#flash{
+    position:absolute;
+    inset:0;
+    background:white;
+    display:none;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+    z-index:200;
+}
+
+#flash img{
+    width:520px;
+    opacity:0;
+    animation:boom .9s forwards ease-out;
+}
+
+@keyframes boom{
+    0%{
+        transform:scale(.2) rotate(-10deg);
+        opacity:0;
+    }
+    30%{
+        transform:scale(1.15) rotate(5deg);
+        opacity:.9;
+    }
+    100%{
+        transform:scale(2.8);
+        opacity:0;
+    }
+}
+
+#cardsScreen{
+    position:absolute;
+    inset:0;
+    display:none;
+    background:#efefef;
+}
+
+#cardsContainer{
+    position:absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 1000px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 40px 30px;
+}
+
+.card{
+    width:220px;
+    opacity:0;
+    background: white;
+    padding: 8px;
+    border: 3px solid black;
+    border-radius: 12px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    transform: scale(.1);
+    animation: explodeCard .7s forwards cubic-bezier(.18,1.3,.4,1);
+}
+
+.card img{
+    width:100%;
+    height: 280px;
+    object-fit: cover;
+    display:block;
+    border-radius: 6px;
+}
+
+.card-title{
+    text-align:center;
+    font-size:26px;
+    line-height: 1.1;
+    color:black;
+    margin-top:8px;
+    word-wrap: break-word;
+}
+
+@keyframes explodeCard{
+    0%{
+        transform: scale(.1) rotate(-40deg);
+        opacity:0;
+    }
+    40%{
+        transform: scale(1.25) rotate(10deg);
+        opacity:1;
+    }
+    100%{
+        transform: scale(1) rotate(0deg);
+        opacity:1;
+    }
+}
+
+#continueBtn{
+    position:absolute;
+    left:50%;
+    bottom:35px;
+    transform:translateX(-50%);
+    border:none;
+    background:black;
+    color:white;
+    font-size:54px;
+    padding:10px 45px;
+    cursor:pointer;
+    opacity:0;
+    pointer-events:none;
+    transition: opacity 0.3s ease; 
+    z-index: 100;
+}
+
+#continueBtn.show{
+    opacity:0.25; 
+    pointer-events:auto;
+}
+
+#continueBtn.show:hover {
+    opacity: 1;
+}
+
+#timer{
+    position:absolute;
+    bottom:20px;
+    width:100%;
+    text-align:center;
+    font-size:48px;
+    z-index:20;
+}
+
+#catalog{
+    position:absolute;
+    inset:0;
+    background:#efefef;
+    display:none;
+    overflow-y:auto;
+    z-index:500;
+    padding:120px 30px 50px;
+}
+
+#catalogTitle{
+    text-align:center;
+    font-size:90px;
+}
+
+#catalogCount{
+    text-align:center;
+    font-size:42px;
+    margin-bottom:50px;
+}
+
+#catalogGrid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:25px;
+}
+
+.catalogCard{
+    text-align:center;
+}
+
+.catalogCard img{
+    width:100%;
+}
+
+.catalogName{
+    font-size:30px;
+}
+
+.catalogOwned{
+    font-size:24px;
+}
+
+#closeCatalog{
+    position:fixed;
+    top:20px;
+    right:30px;
+    border:none;
+    background:none;
+    font-size:60px;
+    cursor:pointer;
+    z-index: 600;
+}
+
+@media(max-width:900px){
+    .title{
+        font-size:72px;
+        top:20px;
+    }
+
+    #openScreen{
+        padding-top:100px;
+    }
+
+    #sachetWrap{
+        width:190px;
+        height:350px;
+    }
+
+    #sachet{
+        width:170px;
+    }
+
+    .click{
+        font-size:42px;
+    }
+
+    #cardsContainer {
+        top: 48%;
+        gap: 15px 12px;
+    }
+
+    .card{
+        width:105px;
+        padding: 4px;
+        border-width: 2px;
+        border-radius: 8px;
+    }
+
+    .card img{
+        height: 130px;
+        border-radius: 4px;
+    }
+
+    .card-title{
+        font-size:14px;
+        margin-top: 4px;
+    }
+
+    #timer{
+        font-size:34px;
+        bottom:15px;
+    }
+}
+</style>
+</head>
+
+<body>
+<div id="app">
+
+<div class="title" id="mainTitle">
+    OPEN THAT<br>
+    JACK PACK!
+</div>
+
+<button class="top-btn" id="catalogBtn">
+    CATALOG
+</button>
+
+<div id="openScreen">
+    <div id="sachetWrap">
+        <img src="sachet.png" id="sachet">
+    </div>
+</div>
+
+<div id="flash">
+    <img src="sachet.png">
+</div>
+
+<div id="cardsScreen">
+    <div id="cardsContainer"></div>
+    <button id="continueBtn">CONTINUE</button>
+</div>
+
+<div id="timer"></div>
+
+<div id="catalog">
+    <button id="closeCatalog">X</button>
+
+    <div id="catalogTitle">
+        CARD CATALOG
+    </div>
+
+    <div id="catalogCount"></div>
+
+    <div id="catalogGrid"></div>
+</div>
+
+</div>
+
+<script>
+const cards = [
+    { id: 1, name: "DON'T SUBSCRIBE", image: "1.png", chance: 85/30, owned: 0 },
+    { id: 2, name: "EJSAFC", image: "2.png", chance: 85/30, owned: 0 },
+    { id: 3, name: "GEOGRAPHY STUFF", image: "3.png", chance: 85/30, owned: 0 },
+    { id: 4, name: "NO CONTEXT JACKSUCKSATLIFE", image: "4.png", chance: 85/30, owned: 0 },
+    { id: 5, name: "jackmasseywelsh", image: "5.png", chance: 85/30, owned: 0 },
+    { id: 6, name: "jacksepic youtubechannel fullof funtimes andfunhirickx", image: "6.png", chance: 85/30, owned: 0 },
+    { id: 7, name: "I'M not typing that", image: "7.png", chance: 85/30, owned: 0 },
+    { id: 8, name: "Jacksucksatclips", image: "8.png", chance: 85/30, owned: 0 },
+    { id: 9, name: "Jacksucksat espanol", image: "9.png", chance: 85/30, owned: 0 },
+    { id: 10, name: "jacksucksat geography", image: "10.png", chance: 85/30, owned: 0 },
+    { id: 11, name: "jacksucksatlife (i couldn't find a good picture)", image: "11(life).png", chance: 85/30, owned: 0 },
+    { id: 12, name: "samsmellsof apricots", image: "12.png", chance: 85/30, owned: 0 },
+    { id: 13, name: "pretty woman kitchen", image: "13.png", chance: 85/30, owned: 0 },
+    { id: 14, name: "Turdboi420", image: "14.png", chance: 85/30, owned: 0 },
+    { id: 15, name: "Banana Warfare", image: "15.png", chance: 85/30, owned: 0 },
+    { id: 16, name: "Count jackular", image: "16.png", chance: 85/30, owned: 0 },
+    { id: 17, name: "Ducks with guns", image: "17.png", chance: 85/30, owned: 0 },
+    { id: 18, name: "Hacker trolling", image: "18.png", chance: 85/30, owned: 0 },
+    { id: 19, name: "play button saga", image: "19.png", chance: 85/30, owned: 0 },
+    { id: 20, name: "Captain kong", image: "20.png", chance: 85/30, owned: 0 },
+    { id: 21, name: "editor becky", image: "21.png", chance: 85/30, owned: 0 },
+    { id: 22, name: "editor kai", image: "22.png", chance: 85/30, owned: 0 },
+    { id: 23, name: "Jack & Becky", image: "23.png", chance: 85/30, owned: 0 },
+    { id: 24, name: "JacksucksatMc", image: "24.png", chance: 85/30, owned: 0 },
+    { id: 25, name: "pink hair Jack", image: "25.png", chance: 85/30, owned: 0 },
+    { id: 26, name: "my ultimate youtube goal", image: "26.png", chance: 85/30, owned: 0 },
+    { id: 27, name: "Traffic Cone Becky (Signed!)", image: "27.png", chance: 85/30, owned: 0 },
+    { id: 28, name: "100m award in space", image: "28.png", chance: 85/30, owned: 0 },
+    { id: 29, name: "the attic tour", image: "29.png", chance: 85/30, owned: 0 },
+    { id: 30, name: "big daddy (rare)", image: "30.png", chance: 85/30, owned: 0 },
+
+    { id: 31, name: "jack humping plant", image: "31.png", chance: 12/12, owned: 0 },
+    { id: 32, name: "jack on a unicycle", image: "32.png", chance: 12/12, owned: 0 },
+    { id: 33, name: "jackerpillar", image: "33.png", chance: 12/12, owned: 0 },
+    { id: 34, name: "Jackerpillar (rare)", image: "34.png", chance: 12/12, owned: 0 },
+    { id: 35, name: "poor jack", image: "35.png", chance: 12/12, owned: 0 },
+    { id: 36, name: "swirly face", image: "36.png", chance: 12/12, owned: 0 },
+    { id: 37, name: "i dont even like champagne", image: "37.png", chance: 12/12, owned: 0 },
+    { id: 38, name: "toilet mutant jack (rare)", image: "38.png", chance: 12/12, owned: 0 },
+    { id: 39, name: "the wee wee bush (rare)", image: "39.png", chance: 12/12, owned: 0 },
+    { id: 40, name: "#TOILETGANG", image: "40.png", chance: 12/12, owned: 0 },
+    { id: 41, name: "jack humping plant (rare)", image: "41.png", chance: 12/12, owned: 0 },
+    { id: 42, name: "celebrating with the gang<3", image: "42.png", chance: 12/12, owned: 0 },
+
+    { id: 43, name: "duck gang", image: "43.png", chance: 2.5/8, owned: 0 },
+    { id: 44, name: "beans on toast", image: "44.png", chance: 2.5/8, owned: 0 }, // Fixed syntax typo here
+    { id: 45, name: "self portrait", image: "49.png", chance: 2.5/8, owned: 0 },
+    { id: 46, name: "i am a rhombus", image: "46.png", chance: 2.5/8, owned: 0 },
+    { id: 47, name: "free monies?", image: "47.png", chance: 2.5/8, owned: 0 },
+    { id: 48, name: "fufik", image: "48.png", chance: 2.5/8, owned: 0 },
+    { id: 49, name: "how rare is your body", image: "50.png", chance: 2.5/8, owned: 0 },
+    { id: 50, name: "disappointed ksi", image: "51.png", chance: 2.5/8, owned: 0 },
+
+    { id: 51, name: "jack in a pool", image: "45.png", chance: 0.49/4, owned: 0 },
+    { id: 52, name: "jacksucks atlife: 10 year anniversary", image: "102.png", chance: 0.49/4, owned: 0 },
+    { id: 53, name: "Jacksucks atlife: collectors edition", image: "101.png", chance: 0.49/4, owned: 0 },
+    { id: 54, name: "RARE unsigned traffic cone becky card", image: "100.png", chance: 0.49/4, owned: 0 },
+    { id: 55, name: "Signed RARE wee wee bush with new signature + redditor name (holo)", image: "103.png", chance: 0.01, owned: 0 },
+];
+
+const TOTAL_CARDS = cards.length;
+cards.forEach(card=>{
+    card.owned = Number(localStorage.getItem('owned_'+card.id) || 0)
+})
+
+const openScreen = document.getElementById('openScreen')
+const flash = document.getElementById('flash')
+const cardsScreen = document.getElementById('cardsScreen')
+const cardsContainer = document.getElementById('cardsContainer')
+const continueBtn = document.getElementById('continueBtn')
+const timer = document.getElementById('timer')
+const mainTitle = document.getElementById('mainTitle')
+const catalog = document.getElementById('catalog')
+const catalogBtn = document.getElementById('catalogBtn')
+const closeCatalog = document.getElementById('closeCatalog')
+const catalogGrid = document.getElementById('catalogGrid')
+const catalogCount = document.getElementById('catalogCount')
+
+let nextOpen = Number(localStorage.getItem('nextOpen') || 0)
+let clickInterval = null
+let activeClicks = []
+
+function clearClicks(){
+    activeClicks.forEach(click=>{
+        click.remove()
+    })
+    activeClicks = []
+}
+
+function pickCard(){
+    let total = 0
+    cards.forEach(card=>{
+        total += card.chance
+    })
+
+    let random = Math.random() * total
+    let current = 0
+
+    for(let card of cards){
+        current += card.chance
+        if(random <= current){
+            return card
+        }
+    }
+}
+
+function summonCards(){
+    cardsContainer.innerHTML = ''
+
+    for(let i = 0; i < 6; i++){
+        const card = pickCard()
+        card.owned++
+
+        localStorage.setItem('owned_'+card.id, card.owned)
+
+        const div = document.createElement('div')
+        div.className = 'card'
+        div.style.animationDelay = i * .08 + 's'
+
+        div.innerHTML = `
+            <img src="${card.image}">
+            <div class="card-title">${card.name}</div>
+        `
+        cardsContainer.appendChild(div)
+    }
+
+    setTimeout(()=>{
+        continueBtn.classList.add('show')
+    },4000)
+}
+
+function startOpening(){
+    clearInterval(clickInterval)
+    clearClicks()
+
+    flash.style.display = 'flex'
+    openScreen.style.display = 'none'
+    timer.style.display = 'none'
+    mainTitle.classList.add('hide')
+
+    setTimeout(()=>{
+        flash.style.display = 'none'
+        cardsScreen.style.display = 'block'
+        summonCards()
+    },900)
+}
+
+function updateTimer(){
+    const now = Date.now()
+
+    if(now >= nextOpen){
+        timer.innerHTML = ''
+        if(!clickInterval && openScreen.style.display !== 'none'){
+            startClicks()
+        }
+        return
+    }
+
+    clearInterval(clickInterval)
+    clickInterval = null
+    clearClicks()
+
+    const diff = nextOpen - now
+    const h = Math.floor(diff / 1000 / 60 / 60)
+    const m = Math.floor(diff / 1000 / 60) % 60
+    const s = Math.floor(diff / 1000) % 60
+
+    timer.innerHTML = `NEXT SACHET IN ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+}
+
+function openCatalog(){
+    clearInterval(clickInterval)
+    clearClicks()
+
+    catalog.style.display = 'block'
+    catalogGrid.innerHTML = ''
+
+    let unlocked = 0
+
+    cards.forEach(card=>{
+        if(card.owned > 0) unlocked++
+
+        const div = document.createElement('div')
+        div.className = 'catalogCard'
+
+        // Pure player discovery logic: if unowned, it shows question.png, period.
+        div.innerHTML = `
+            <img src="${card.owned === 0 ? 'question.png' : card.image}">
+            <div class="catalogName">${card.name}</div>
+            <div class="catalogOwned">x${card.owned}</div>
+        `
+        catalogGrid.appendChild(div)
+    })
+
+    catalogCount.innerHTML = `${unlocked} / ${TOTAL_CARDS} UNLOCKED`
+}
+
+function overlaps(x,y,rect,padding=0){
+    return (
+        x >= rect.left - padding &&
+        x <= rect.right + padding &&
+        y >= rect.top - padding &&
+        y <= rect.bottom + padding
+    )
+}
+
+function safeSpot(x,y){
+    const blocked = [
+        [document.getElementById('sachetWrap'),55],
+        [document.getElementById('mainTitle'),30],
+        [document.getElementById('catalogBtn'),40],
+        [document.getElementById('timer'),35]
+    ]
+
+    for(let item of blocked){
+        const element = item[0]
+        const padding = item[1]
+
+        if(!element) continue
+        if(element.style.display === 'none') continue
+
+        if(overlaps(x,y,element.getBoundingClientRect(),padding)){
+            return false
+        }
+    }
+
+    if(y < 50 || y > window.innerHeight - 60) return false
+    if(x < 40 || x > window.innerWidth - 40) return false
+
+    return true
+}
+
+function spawnClick(){
+    if(Date.now() < nextOpen) return
+
+    let x
+    let y
+    let placed = false
+
+    for(let i = 0; i < 80; i++){
+        x = 50 + Math.random() * (window.innerWidth - 100)
+        y = 100 + Math.random() * (window.innerHeight - 180)
+
+        if(safeSpot(x,y)){
+            placed = true
+            break
+        }
+    }
+
+    if(!placed){
+        x = Math.random() * window.innerWidth
+        y = Math.random() * window.innerHeight
+    }
+
+    const click = document.createElement('div')
+    click.className = 'click'
+    click.textContent = 'CLICK!'
+    click.style.left = x + 'px'
+    click.style.top = y + 'px'
+    click.style.fontSize = 48 + Math.random() * 44 + 'px'
+
+    click.style.setProperty('--rot-start', (-25 + Math.random()*50) + 'deg')
+    click.style.setProperty('--rot-mid', (-10 + Math.random()*20) + 'deg')
+    click.style.setProperty('--rot-end', (-15 + Math.random()*30) + 'deg')
+
+    document.body.appendChild(click)
+    activeClicks.push(click)
+
+    requestAnimationFrame(()=>{
+        click.classList.add('show')
+    })
+
+    setTimeout(()=>{
+        click.style.opacity = '0'
+        setTimeout(()=>{
+            click.remove()
+            activeClicks = activeClicks.filter(c=>c !== click)
+        },500)
+    },2500 + Math.random() * 1500)
+}
+
+function startClicks(){
+    clearInterval(clickInterval)
+    clearClicks()
+
+    for(let i = 0; i < 3; i++){
+        setTimeout(spawnClick, i * 180)
+    }
+
+    clickInterval = setInterval(()=>{
+        if(openScreen.style.display === 'none') return
+        spawnClick()
+
+        if(Math.random() > .7){
+            setTimeout(spawnClick,100)
+        }
+    },1500)
+}
+
+sachetWrap.onclick = ()=>{
+    if(Date.now() < nextOpen) return
+    startOpening()
+}
+
+continueBtn.onclick = ()=>{
+    continueBtn.classList.remove('show')
+    cardsScreen.style.display = 'none'
+    openScreen.style.display = 'flex'
+    timer.style.display = 'block'
+    mainTitle.classList.remove('hide')
+
+    nextOpen = new Date().setHours(24,0,0,0)
+    localStorage.setItem('nextOpen', nextOpen)
+    updateTimer()
+}
+
+catalogBtn.onclick = openCatalog
+
+closeCatalog.onclick = ()=>{
+    catalog.style.display = 'none'
+    if(Date.now() >= nextOpen){
+        startClicks()
+    }
+}
+
+setInterval(()=>{
+    updateTimer()
+    if(Date.now() >= nextOpen && !clickInterval && openScreen.style.display !== 'none'){
+        startClicks()
+    }
+},1000)
+
+updateTimer()
+
+if(Date.now() >= nextOpen){
+    setTimeout(startClicks,300)
+}
+</script>
+</body>
+</html>
